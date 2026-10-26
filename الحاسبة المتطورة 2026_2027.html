@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الحاسبة المتطورة</title>
+<style>
+:root{--bg:#fff;--surf:#f2f2f2;--key:#fff;--ink:#0a0a0a;--mut:#767676;--line:#d9d9d9;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--surf:#161616;--key:#1f1f1f;--ink:#f5f5f5;--mut:#9a9a9a;--line:#333;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000;--surf:#161616;--key:#1f1f1f;--ink:#f5f5f5;--mut:#9a9a9a;--line:#333;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:440px;padding:14px 14px 28px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.brand{font-weight:800;font-size:18px}
+.brand small{color:var(--mut);font-weight:600;font-size:12px;margin-inline-start:6px}
+.chip{border:1.5px solid var(--line);background:var(--surf);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.disp{background:var(--surf);border:2px solid var(--ink);border-radius:20px;padding:12px 16px;direction:ltr;text-align:right;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);font-weight:700;min-height:18px}
+.expr{font-size:21px;color:var(--mut);min-height:30px;word-break:break-all;line-height:1.3}
+.res{font-size:44px;font-weight:700;min-height:54px;word-break:break-all;line-height:1.15;cursor:pointer}
+.res.err{font-size:24px}
+.row{display:flex;gap:6px;margin:10px 0 0;direction:ltr}
+.row .chip{flex:1;padding:6px 0;text-align:center}
+.sci{display:none;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px;direction:ltr}
+.sci.show{display:grid}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;direction:ltr;margin-top:10px}
+button.k{border:1.5px solid var(--line);background:var(--key);color:var(--ink);border-radius:16px;height:56px;font-size:21px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .06s}
+button.k:active{transform:scale(.94)}
+button.s{height:42px;font-size:15px;background:var(--surf);border-radius:13px}
+button.o{background:var(--surf);font-weight:700}
+button.p{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:700}
+.hist{margin-top:10px;background:var(--surf);border-radius:18px;padding:10px 14px;display:none;max-height:150px;overflow-y:auto}
+.hist.show{display:block}
+.hh{display:flex;justify-content:space-between;font-weight:800;margin-bottom:6px}
+.hh button,.lnk{border:0;background:none;color:var(--ink);text-decoration:underline;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;padding:0}
+.it{padding:7px 0;border-top:1px solid var(--line);direction:ltr;text-align:right;cursor:pointer}
+.it span{display:block;color:var(--mut);font-size:13px}.it b{font-size:18px}
+.empty{color:var(--mut);font-size:14px;padding:6px 0}
+.cur{display:none;margin-top:10px;background:var(--surf);border-radius:18px;padding:12px 14px}
+.cur.show{display:block}
+.cv{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+select,input{font-family:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:9px 10px;min-width:0}
+.cv select{width:100%}
+select:focus,input:focus{outline:2px solid var(--ink)}
+.sw{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--ink);color:var(--bg);font-size:17px;cursor:pointer}
+.big{font-size:28px;font-weight:700;direction:ltr;text-align:right;word-break:break-all;margin:10px 0 6px;min-height:36px}
+.rt{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);font-weight:600;direction:ltr}
+.rt input{flex:1;direction:ltr;text-align:right;padding:7px 10px}
+.note{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.6}
+.lnks{display:flex;gap:14px;margin-top:8px}
+.all{display:none;margin-top:10px}
+.all.show{display:block}
+.all input{width:100%}
+.al{max-height:230px;overflow-y:auto;margin-top:8px}
+.cr{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);cursor:pointer;font-size:14px}
+.cr span{color:var(--mut)}
+.cr b{direction:ltr;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">حاسبة<small>2026 / 2027</small></div>
+    <button class="chip" id="themeBtn" type="button">الوضع: تلقائي</button>
+  </div>
+
+  <div class="disp">
+    <div class="meta"><span id="mem"></span><span id="mode">DEG</span></div>
+    <div class="expr" id="expr"></div>
+    <div class="res" id="res" title="اضغط للنسخ">0</div>
+  </div>
+
+  <div class="cur" id="cur">
+    <div class="cv"><select id="cf"></select><button class="sw" id="swp" type="button">⇄</button><select id="ct"></select></div>
+    <div class="big" id="cres">0</div>
+    <div class="rt"><span id="rlab">1 USD =</span><input id="rin" type="text" inputmode="decimal"></div>
+    <div class="note">أسعار مرجعية تقريبية (آخر تحديث: 25 أكتوبر 2026) وليست لحظية. يمكنك تعديل سعر الصرف أعلاه ليطابق سعر اليوم.</div>
+    <div class="lnks"><button class="lnk" id="allBtn" type="button">كل العملات</button><button class="lnk" id="rst" type="button">إعادة ضبط الأسعار</button></div>
+    <div class="all" id="all"><input id="q" type="text" placeholder="ابحث عن دولة أو عملة"><div class="al" id="al"></div></div>
+  </div>
+
+  <div class="hist show" id="hist"><div class="hh"><span>العمليات السابقة</span><button id="clr" type="button">مسح الكل</button></div><div id="hl"></div></div>
+
+  <div class="row">
+    <button class="chip" id="sciBtn" type="button">علمية</button>
+    <button class="chip" id="secBtn" type="button">2nd</button>
+    <button class="chip" id="degBtn" type="button">DEG</button>
+    <button class="chip" id="curBtn" type="button">عملات</button>
+    <button class="chip on" id="hisBtn" type="button">السجل</button>
+  </div>
+  <div class="row">
+    <button class="chip" data-m="MC" type="button">MC</button><button class="chip" data-m="MR" type="button">MR</button>
+    <button class="chip" data-m="M+" type="button">M+</button><button class="chip" data-m="M-" type="button">M−</button>
+  </div>
+  <div class="sci" id="sci"></div>
+  <div class="pad" id="pad"></div>
+</div>
+<script>
+(function(){
+var expr="",ans="0",deg=true,justEq=false,hist=[],mem=0,sec=false;
+var $=function(i){return document.getElementById(i)};
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+try{hist=JSON.parse(ls("calc_hist")||"[]");if(!Array.isArray(hist))hist=[]}catch(e){hist=[]}
+
+/* theme */
+var modes=["auto","light","dark"],names={auto:"تلقائي",light:"فاتح",dark:"داكن"},tm=ls("calc_theme");
+if(modes.indexOf(tm)<0)tm="auto";
+function applyTheme(){var r=document.documentElement;if(tm==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",tm);$("themeBtn").textContent="الوضع: "+names[tm]}
+$("themeBtn").onclick=function(){tm=modes[(modes.indexOf(tm)+1)%3];ls("calc_theme",tm);applyTheme()};
+applyTheme();
+
+/* parser */
+function evalx(src){
+  var s=src.replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/π/g,"pi").replace(/√/g,"sqrt");
+  var t=s.match(/\d*\.?\d+|[a-z]+|[-+*\/^()!%]/g)||[];var p=0;
+  function pk(){return t[p]}
+  function ex(){var v=tr();while(pk()==="+"||pk()==="-"){var o=t[p++],r=tr();v=o==="+"?v+r:v-r}return v}
+  function tr(){var v=un();for(;;){var c=pk();
+    if(c==="*"||c==="/"){p++;var r=un();v=c==="*"?v*r:v/r}
+    else if(c!==undefined&&(/^[\d.]/.test(c)||/^[a-z]/.test(c)||c==="(")){v=v*un()}
+    else break}return v}
+  function un(){if(pk()==="-"){p++;return -un()}if(pk()==="+"){p++;return un()}return pw()}
+  function pw(){var b=pf();if(pk()==="^"){p++;return Math.pow(b,un())}return b}
+  function pf(){var v=pr();while(pk()==="!"||pk()==="%"){if(t[p++]==="!")v=fact(v);else v=v/100}return v}
+  function fact(n){if(n<0||n!==Math.floor(n)||n>170)throw 0;var r=1;for(var i=2;i<=n;i++)r*=i;return r}
+  function pr(){var c=t[p++];
+    if(c===undefined)throw 0;
+    if(/^[\d.]/.test(c))return parseFloat(c);
+    if(c==="("){var v=ex();if(pk()===")")p++;return v}
+    if(c==="pi")return Math.PI;
+    if(c==="e")return Math.E;
+    if(c==="ans")return parseFloat(ans);
+    var a;
+    if(pk()==="("){p++;a=ex();if(pk()===")")p++}else a=pw();
+    var k=deg?Math.PI/180:1;
+    switch(c){
+      case"sin":return deg&&Math.abs(a%180)<1e-12?0:Math.sin(a*k);
+      case"cos":return deg&&Math.abs((a-90)%180)<1e-12?0:Math.cos(a*k);
+      case"tan":return Math.tan(a*k);
+      case"asin":return Math.asin(a)/k;
+      case"acos":return Math.acos(a)/k;
+      case"atan":return Math.atan(a)/k;
+      case"ln":return Math.log(a);
+      case"log":return Math.log10(a);
+      case"sqrt":return Math.sqrt(a);
+      case"abs":return Math.abs(a);
+    }
+    throw 0}
+  if(!t.length)throw 0;
+  var v=ex();if(p<t.length||!isFinite(v)||isNaN(v))throw 0;
+  return v}
+function fmt(v){var s=String(parseFloat(v.toPrecision(12)));return s.indexOf("e")>-1?s.replace("e+","e"):s}
+function balance(s){var o=(s.match(/\(/g)||[]).length,c=(s.match(/\)/g)||[]).length;return s+")".repeat(Math.max(0,o-c))}
+function cur(){try{return evalx(balance(expr||"ans"))}catch(e){return parseFloat(ans)||0}}
+
+function render(){
+  $("expr").textContent=expr;$("mem").textContent=mem?"M":"";
+  var r=$("res");r.className="res";
+  if(!expr){r.textContent=justEq?ans:"0"}
+  else{try{r.textContent=fmt(evalx(balance(expr)))}catch(e){r.textContent="…"}}
+  if($("cur").classList.contains("show"))upd(false)
+}
+function put(x){
+  if(justEq){expr=/^[+×÷−^!%]$/.test(x)?"ans":"";justEq=false}
+  expr+=x;render()}
+function equals(){
+  if(!expr)return;var src=balance(expr);
+  try{var out=fmt(evalx(src));
+    hist.unshift({e:src,r:out});hist=hist.slice(0,30);ls("calc_hist",JSON.stringify(hist));drawHist();
+    ans=out;expr="";justEq=true;$("res").textContent=out;$("expr").textContent=src+" =";
+    if($("cur").classList.contains("show"))upd(false)}
+  catch(e){var r=$("res");r.textContent="خطأ في الصيغة";r.className="res err"}
+}
+function act(k){
+  switch(k){
+    case"AC":expr="";justEq=false;render();$("res").textContent="0";break;
+    case"DEL":if(justEq){expr="";justEq=false}else expr=expr.replace(/(asin|acos|atan|sin|cos|tan|ln|log|abs|√)\($|ans$|.$/,"");render();break;
+    case"=":equals();break;
+    case"±":if(expr&&!justEq){expr=expr.charAt(0)==="−"?expr.slice(1):"−"+expr}else{expr="−"+(justEq?"ans":"");justEq=false}render();break;
+    case"x²":put("^2");break;
+    case"1/x":put("^(−1)");break;
+    case"eˣ":put("e^(");break;
+    case"10ˣ":put("10^(");break;
+    case"sin":case"cos":case"tan":case"asin":case"acos":case"atan":case"ln":case"log":case"abs":put(k+"(");break;
+    case"√":put("√(");break;
+    case"Ans":put("ans");break;
+    default:put(k)}
+}
+var base=[["sin","asin"],["cos","acos"],["tan","atan"],["ln","eˣ"],["log","10ˣ"],["x²"],["√"],["^"],["!"],["1/x"],["("],[")"],["π"],["e"],["abs"]];
+function buildSci(){var el=$("sci");el.innerHTML="";base.forEach(function(a){var b=document.createElement("button");b.type="button";b.className="k s";var k=sec&&a[1]?a[1]:a[0];b.textContent=k==="abs"?"|x|":k;b.setAttribute("data-k",k);el.appendChild(b)})}
+buildSci();
+var padKeys=[["AC","o"],["DEL","o","⌫"],["%","o"],["÷","p"],["7"],["8"],["9"],["×","p"],["4"],["5"],["6"],["−","p"],["1"],["2"],["3"],["+","p"],["±","o"],["0"],["."],["=","p"]];
+padKeys.forEach(function(a){var b=document.createElement("button");b.type="button";b.className="k "+(a[1]||"");b.textContent=a[2]||a[0];b.setAttribute("data-k",a[0]);$("pad").appendChild(b)});
+document.querySelector(".app").addEventListener("click",function(ev){var b=ev.target.closest("button[data-k]");if(b)act(b.getAttribute("data-k"));
+  var m=ev.target.closest("button[data-m]");if(m)memory(m.getAttribute("data-m"))});
+function memory(k){var v=cur();
+  if(k==="MC")mem=0;else if(k==="MR"){put(fmt(mem));return}
+  else if(k==="M+")mem+=v;else if(k==="M-")mem-=v;
+  render()}
+$("sciBtn").onclick=function(){$("sci").classList.toggle("show");this.classList.toggle("on")};
+$("secBtn").onclick=function(){sec=!sec;this.classList.toggle("on",sec);buildSci()};
+$("degBtn").onclick=function(){deg=!deg;this.textContent=deg?"DEG":"RAD";$("mode").textContent=deg?"DEG":"RAD";render()};
+$("hisBtn").onclick=function(){$("hist").classList.toggle("show");this.classList.toggle("on")};
+$("clr").onclick=function(){hist=[];ls("calc_hist","[]");drawHist()};
+$("res").onclick=function(){var t=this.textContent,s=this;try{navigator.clipboard.writeText(t);s.style.opacity=.4;setTimeout(function(){s.style.opacity=1},250)}catch(e){}};
+function drawHist(){var h=$("hl");h.innerHTML="";
+  if(!hist.length){h.innerHTML='<div class="empty">لا توجد عمليات بعد</div>';return}
+  hist.forEach(function(x){var d=document.createElement("div");d.className="it";
+    var a=document.createElement("span");a.textContent=x.e+" =";var b=document.createElement("b");b.textContent=x.r;
+    d.appendChild(a);d.appendChild(b);d.onclick=function(){expr=x.r;justEq=false;render()};h.appendChild(d)})}
+drawHist();
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey||e.metaKey||/INPUT|SELECT/.test((e.target||{}).tagName||""))return;var k=e.key;
+  if(/^[0-9.()+^!%]$/.test(k))act(k);
+  else if(k==="-")act("−");else if(k==="*")act("×");else if(k==="/"){e.preventDefault();act("÷")}
+  else if(k==="Enter"||k==="="){e.preventDefault();act("=")}
+  else if(k==="Backspace")act("DEL");else if(k==="Escape")act("AC")});
+
+/* currencies: code|name|units per 1 USD (approximate reference snapshot) */
+var D=("USD|دولار أمريكي (أمريكا)|1\nSAR|ريال سعودي (السعودية)|3.75\nAED|درهم إماراتي (الإمارات)|3.6725\nQAR|ريال قطري (قطر)|3.64\nKWD|دينار كويتي (الكويت)|0.307\nBHD|دينار بحريني (البحرين)|0.376\nOMR|ريال عماني (عُمان)|0.3845\nJOD|دينار أردني (الأردن)|0.709\nEGP|جنيه مصري (مصر)|48.5\nIQD|دينار عراقي (العراق)|1310\nLBP|ليرة لبنانية (لبنان)|89500\nSYP|ليرة سورية (سوريا)|11000\nYER|ريال يمني (اليمن)|1600\nLYD|دينار ليبي (ليبيا)|5.4\nTND|دينار تونسي (تونس)|2.95\nDZD|دينار جزائري (الجزائر)|130\nMAD|درهم مغربي (المغرب)|9.2\nMRU|أوقية موريتانية (موريتانيا)|40\nSDG|جنيه سوداني (السودان)|600\nSOS|شلن صومالي (الصومال)|571\nDJF|فرنك جيبوتي (جيبوتي)|177.7\nKMF|فرنك قمري (جزر القمر)|440\nILS|شيكل إسرائيلي (فلسطين المحتلة / إسرائيل)|3.3\nEUR|يورو (منطقة اليورو)|0.892\nGBP|جنيه إسترليني (بريطانيا)|0.752\nTRY|ليرة تركية (تركيا)|49.7\nIRR|ريال إيراني (إيران)|1050000\nJPY|ين ياباني (اليابان)|157.9\nCNY|يوان صيني (الصين)|6.69\nINR|روبية هندية (الهند)|95\nPKR|روبية باكستانية (باكستان)|277.2\nCHF|فرنك سويسري (سويسرا)|0.826\nCAD|دولار كندي (كندا)|1.41\nAUD|دولار أسترالي (أستراليا)|1.43\nNZD|دولار نيوزيلندي (نيوزيلندا)|1.77\nRUB|روبل روسي (روسيا)|82\nKRW|وون كوري (كوريا الجنوبية)|1330\nHKD|دولار هونغ كونغ|7.85\nSGD|دولار سنغافوري (سنغافورة)|1.28\nMYR|رينغيت ماليزي (ماليزيا)|4.1\nIDR|روبية إندونيسية (إندونيسيا)|17000\nTHB|بات تايلندي (تايلاند)|33.4\nVND|دونغ فيتنامي (فيتنام)|26300\nPHP|بيزو فلبيني (الفلبين)|58.5\nTWD|دولار تايواني (تايوان)|31.5\nBDT|تاكا بنغلاديشية (بنغلاديش)|122\nLKR|روبية سريلانكية (سريلانكا)|300\nNPR|روبية نيبالية (نيبال)|140\nAFN|أفغاني (أفغانستان)|68\nMMK|كيات ميانماري (ميانمار)|2100\nKHR|ريال كمبودي (كمبوديا)|4020\nLAK|كيب لاوسي (لاوس)|21700\nBND|دولار بروناي (بروناي)|1.28\nMVR|روفيه مالديفية (المالديف)|15.4\nBTN|نغولتروم بوتاني (بوتان)|95\nMNT|توغروغ منغولي (منغوليا)|3600\nMOP|باتاكا ماكاوي (ماكاو)|8.1\nKZT|تنغي كازاخستاني (كازاخستان)|510\nUZS|سوم أوزبكي (أوزبكستان)|12100\nKGS|سوم قيرغيزي (قيرغيزستان)|87\nTJS|سوموني طاجيكي (طاجيكستان)|9.3\nTMT|مانات تركمانستاني (تركمانستان)|3.5\nAZN|مانات أذربيجاني (أذربيجان)|1.7\nGEL|لاري جورجي (جورجيا)|2.7\nAMD|درام أرميني (أرمينيا)|380\nUAH|هريفنيا أوكرانية (أوكرانيا)|41.5\nBYN|روبل بيلاروسي (بيلاروسيا)|3.2\nMDL|ليو مولدوفي (مولدوفا)|17.2\nPLN|زلوتي بولندي (بولندا)|3.9\nCZK|كورونا تشيكية (التشيك)|21.7\nHUF|فورنت مجري (المجر)|327\nRON|ليو روماني (رومانيا)|4.55\nBGN|ليف بلغاري (بلغاريا)|1.74\nRSD|دينار صربي (صربيا)|104.5\nBAM|مارك بوسني (البوسنة)|1.745\nMKD|دينار مقدوني (مقدونيا الشمالية)|55\nALL|ليك ألباني (ألبانيا)|85\nDKK|كرونة دنماركية (الدنمارك)|6.65\nNOK|كرونة نرويجية (النرويج)|9.43\nSEK|كرونة سويدية (السويد)|9.9\nISK|كرونة آيسلندية (آيسلندا)|122\nMXN|بيزو مكسيكي (المكسيك)|18.5\nBRL|ريال برازيلي (البرازيل)|5.0\nARS|بيزو أرجنتيني (الأرجنتين)|1450\nCLP|بيزو تشيلي (تشيلي)|980\nCOP|بيزو كولومبي (كولومبيا)|3700\nPEN|سول بيروفي (بيرو)|3.45\nUYU|بيزو أوروغواياني (الأوروغواي)|40\nPYG|غواراني باراغواياني (باراغواي)|7200\nBOB|بوليفيانو (بوليفيا)|6.96\nDOP|بيزو دومينيكاني (الدومينيكان)|63\nGTQ|كيتزال (غواتيمالا)|7.65\nCRC|كولون كوستاريكي (كوستاريكا)|500\nHNL|لمبيرة (هندوراس)|26.3\nNIO|كوردوبا (نيكاراغوا)|36.8\nCUP|بيزو كوبي (كوبا)|24\nHTG|غورد هايتي (هايتي)|131\nJMD|دولار جامايكي (جامايكا)|158\nTTD|دولار ترينيداد (ترينيداد وتوباغو)|6.8\nBBD|دولار بربادوسي (بربادوس)|2\nBZD|دولار بليزي (بليز)|2\nPAB|بالبوا (بنما)|1\nNGN|نايرا (نيجيريا)|1334\nZAR|راند (جنوب أفريقيا)|16.5\nKES|شلن كيني (كينيا)|129\nGHS|سيدي (غانا)|11\nETB|بر إثيوبي (إثيوبيا)|150\nTZS|شلن تنزاني (تنزانيا)|2500\nUGX|شلن أوغندي (أوغندا)|3600\nRWF|فرنك رواندي (رواندا)|1450\nXAF|فرنك وسط أفريقيا (الكاميرون وغيرها)|585\nXOF|فرنك غرب أفريقيا (السنغال وغيرها)|585\nMZN|متيكال (موزمبيق)|63.9\nAOA|كوانزا (أنغولا)|912\nZMW|كواشا زامبية (زامبيا)|23\nBWP|بولا (بوتسوانا)|13.9\nNAD|دولار ناميبي (ناميبيا)|16.5\nMUR|روبية موريشيوسية (موريشيوس)|45\nMWK|كواشا ملاوي (ملاوي)|1750\nCDF|فرنك كونغولي (الكونغو الديمقراطية)|2300\nGMD|دالاسي (غامبيا)|72\nSLE|ليون (سيراليون)|23\nLRD|دولار ليبيري (ليبيريا)|190\nCVE|إسكودو (الرأس الأخضر)|100\nSCR|روبية سيشيلية (سيشل)|14.5\nMGA|أرياري (مدغشقر)|4500\nGNF|فرنك غيني (غينيا)|8650\nERN|ناكفا (إريتريا)|15\nFJD|دولار فيجي (فيجي)|2.25\nPGK|كينا (بابوا غينيا الجديدة)|4.2\nWST|تالا (ساموا)|2.75\nTOP|بالانغا (تونغا)|2.4\nXPF|فرنك المحيط الهادئ (بولينيزيا)|106").split("\n").map(function(l){var a=l.split("|");return{c:a[0],n:a[1],r:parseFloat(a[2])}});
+var R={};D.forEach(function(x){R[x.c]=x.r});
+var OV={};try{OV=JSON.parse(ls("calc_ov")||"{}")||{}}catch(e){OV={}}
+function rate(c){return OV[c]||R[c]}
+function cvt(v,f,t){return v/rate(f)*rate(t)}
+function money(n){if(!isFinite(n))return"—";return n.toLocaleString("en-US",{maximumFractionDigits:Math.abs(n)>=1?2:6})}
+function fillSel(s,def){s.innerHTML="";D.forEach(function(x){var o=document.createElement("option");o.value=x.c;o.textContent=x.c+" — "+x.n;s.appendChild(o)});s.value=def}
+fillSel($("cf"),ls("calc_cf")||"USD");fillSel($("ct"),ls("calc_ct")||"SAR");
+function upd(skipRin){var f=$("cf").value,t=$("ct").value,v=cur();
+  $("cres").textContent=money(cvt(v,f,t))+" "+t;
+  $("rlab").textContent="1 "+f+" =";
+  if(!skipRin){var r=rate(t)/rate(f);$("rin").value=String(parseFloat(r.toPrecision(7)))}
+  if($("all").classList.contains("show"))drawAll()}
+function drawAll(){var q=$("q").value.trim().toLowerCase(),f=$("cf").value,v=cur(),h=$("al");h.innerHTML="";
+  D.forEach(function(x){if(q&&(x.c.toLowerCase()+" "+x.n).toLowerCase().indexOf(q)<0)return;
+    var d=document.createElement("div");d.className="cr";var s=document.createElement("span");s.textContent=x.c+" — "+x.n;
+    var b=document.createElement("b");b.textContent=money(cvt(v,f,x.c));
+    d.appendChild(s);d.appendChild(b);d.onclick=function(){$("ct").value=x.c;ls("calc_ct",x.c);upd(false)};h.appendChild(d)})}
+$("cf").onchange=function(){ls("calc_cf",this.value);upd(false)};
+$("ct").onchange=function(){ls("calc_ct",this.value);upd(false)};
+$("swp").onclick=function(){var a=$("cf").value;$("cf").value=$("ct").value;$("ct").value=a;ls("calc_cf",$("cf").value);ls("calc_ct",a);upd(false)};
+$("rin").oninput=function(){var x=parseFloat(this.value.replace(",","."));if(!(x>0))return;var f=$("cf").value,t=$("ct").value;OV[t]=x*rate(f);ls("calc_ov",JSON.stringify(OV));upd(true)};
+$("rst").onclick=function(){OV={};ls("calc_ov","{}");upd(false)};
+$("allBtn").onclick=function(){var a=$("all");a.classList.toggle("show");if(a.classList.contains("show"))drawAll()};
+$("q").oninput=drawAll;
+$("curBtn").onclick=function(){var c=$("cur");c.classList.toggle("show");this.classList.toggle("on",c.classList.contains("show"));if(c.classList.contains("show"))upd(false)};
+render();
+})();
+</script>
+</body>
+</html>
